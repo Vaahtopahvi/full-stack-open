@@ -111,32 +111,157 @@
 
 // export default App;
 
-import Button from "./components/Button";
-import Display from "./components/Display";
-import { useState } from "react";
-const App = () => {
-  const [counter, setCounter] = useState(0);
-  console.log("rendering with counter value", counter);
+// ------------------ DESTRUKTUROINTI & USE STATE ------------------------------
 
-  const increaseByOne = () => {
-    console.log("increasing, value before", counter);
-    setCounter(counter + 1);
-  };
-  const setToZero = () => {
-    console.log("Setting value to zero", counter);
-    setCounter(0);
-  };
-  const decreaseByOne = () => {
-    console.log("decreasing, value before", counter);
-    setCounter(counter - 1);
-  };
+// import Button from "./components/Button";
+// import Display from "./components/Display";
+// import { useState } from "react";
+// const App = () => {
+//   const [counter, setCounter] = useState(0);
+//   console.log("rendering with counter value", counter);
+
+//   const increaseByOne = () => {
+//     console.log("increasing, value before", counter);
+//     setCounter(counter + 1);
+//   };
+//   const setToZero = () => {
+//     console.log("Setting value to zero", counter);
+//     setCounter(0);
+//   };
+//   const decreaseByOne = () => {
+//     console.log("decreasing, value before", counter);
+//     setCounter(counter - 1);
+//   };
+
+//   return (
+//     <div>
+//       <Display counter={counter} />
+//       <Button onClick={increaseByOne} text="plus" />
+//       <Button onClick={decreaseByOne} text="minus" />
+//       <Button onClick={setToZero} text="zero" />
+//     </div>
+//   );
+// };
+
+// export default App;
+
+// -------------- MONIMUTKAISEMPI TILA, REACTING DEBUGGAUS -------------------
+
+// import Button from "./components/Button";
+// import History from "./components/History";
+// import { useState } from "react";
+// const App = () => {
+//   const [left, setLeft] = useState(0);
+//   const [right, setRight] = useState(0);
+//   // const [total, setTotal] = useState(0);
+//   const [allClicks, setAll] = useState([]);
+
+//   const handleLeftClick = () => {
+//     setAll(allClicks.concat("L"));
+//     const updatedLeft = left + 1;
+//     setLeft(updatedLeft);
+//     // setTotal(updatedLeft + right);
+//   };
+
+//   const handleRightClick = () => {
+//     setAll(allClicks.concat("R"));
+//     const updatedRight = right + 1;
+//     setRight(updatedRight);
+//     // setTotal(left + updatedRight);
+//   };
+
+//   return (
+//     <div>
+//       {left}
+//       <Button onClick={handleLeftClick} text="left" />
+//       <Button onClick={handleRightClick} text="right" />
+//       {right}
+//       <History allClicks={allClicks} />
+//     </div>
+//   );
+// };
+
+// tämä on oikea paikka määritellä komponentti!
+// import { useState } from "react";
+
+// const Display = (props) => <div>{props.value}</div>;
+
+// const Button = (props) => <button onClick={props.onClick}>{props.text}</button>;
+
+// const App = (props) => {
+//   const [value, setValue] = useState(10);
+
+//   const setToValue = (newValue) => {
+//     console.log("value now", newValue);
+//     setValue(newValue);
+//   };
+
+//   return (
+//     <div>
+//       <Display value={value} />
+//       <Button onClick={() => setToValue(1000)} text="thousand" />
+//       <Button onClick={() => setToValue(0)} text="reset" />
+//       <Button onClick={() => setToValue(value + 1)} text="increment" />
+//     </div>
+//   );
+// };
+
+// export default App;
+
+// -------------- Tehtävä 1.6 -------------------
+
+import { useState } from "react";
+
+const App = () => {
+  // tallenna napit omaan tilaansa
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+  const [average, setAverage] = useState([]);
+  const total = good + neutral + bad;
+  const sum = average.reduce((a, b) => a + b, 0);
+
+  console.log(sum);
+  console.log(average);
+
+  //concat ja join todennäköisesti
 
   return (
     <div>
-      <Display counter={counter} />
-      <Button onClick={increaseByOne} text="plus" />
-      <Button onClick={decreaseByOne} text="minus" />
-      <Button onClick={setToZero} text="zero" />
+      <h1>give feedback</h1>
+      <button
+        onClick={() => {
+          setAverage(average.concat(+1));
+          const updatedGood = good;
+          setGood(updatedGood + 1);
+        }}
+      >
+        good
+      </button>
+      <button
+        onClick={() => {
+          setNeutral(neutral + 1);
+          setAverage(average.concat(0));
+        }}
+      >
+        neutral
+      </button>
+      <button
+        onClick={() => {
+          setBad(bad + 1);
+          setAverage(average.concat(-1));
+        }}
+      >
+        bad
+      </button>
+
+      <h2>statistics</h2>
+      {/* good, neutral and bad */}
+      <p>good {good}</p>
+      <p>neutral {neutral}</p>
+      <p>bad {bad}</p>
+      <p>all {total}</p>
+      <p>average {sum / total}</p>
     </div>
   );
 };
