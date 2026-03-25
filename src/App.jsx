@@ -231,9 +231,8 @@ const App = () => {
       <h1>give feedback</h1>
       <button
         onClick={() => {
+          setGood(good + 1);
           setAverage(average.concat(+1));
-          const updatedGood = good;
-          setGood(updatedGood + 1);
         }}
       >
         good
@@ -256,12 +255,13 @@ const App = () => {
       </button>
 
       <h2>statistics</h2>
-      {/* good, neutral and bad */}
+      {/* good, neutral, bad, all, average, good% */}
       <p>good {good}</p>
       <p>neutral {neutral}</p>
       <p>bad {bad}</p>
-      <p>all {total}</p>
+      <p>total {total}</p>
       <p>average {sum / total}</p>
+      <p>good% {((good / total) * 100).toFixed(2)}%</p>
     </div>
   );
 };
