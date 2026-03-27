@@ -211,6 +211,7 @@
 // -------------- Tehtävä 1.6 -------------------
 
 import { useState } from "react";
+import Statistics from "./components/Statistics";
 
 const App = () => {
   // tallenna napit omaan tilaansa
@@ -221,8 +222,9 @@ const App = () => {
   const total = good + neutral + bad;
   const sum = average.reduce((a, b) => a + b, 0);
 
-  console.log(sum);
-  console.log(average);
+  // console.log(sum);
+  // console.log(average);
+  console.log("good:", good, "total:", total);
 
   //concat ja join todennäköisesti
 
@@ -253,7 +255,6 @@ const App = () => {
       >
         bad
       </button>
-
       <h2>statistics</h2>
       {/* good, neutral, bad, all, average, good% */}
       <p>good {good}</p>
@@ -262,6 +263,13 @@ const App = () => {
       <p>total {total}</p>
       <p>average {sum / total}</p>
       <p>good% {((good / total) * 100).toFixed(2)}%</p>
+      <hr></hr>
+      <Statistics text={"good "} amount={good} />
+      <Statistics text={"neutral "} amount={neutral} />
+      <Statistics text={"bad "} amount={bad} />
+      <Statistics text={"total "} amount={total} />
+      <Statistics avg={"average "} sum={sum} total={total} />
+      <Statistics good={"good% "} amount={good} total={total} />
     </div>
   );
 };
