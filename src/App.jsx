@@ -263,6 +263,20 @@ const App = () => {
       <p>total {total}</p>
       <p>average {sum / total}</p>
       <p>good% {((good / total) * 100).toFixed(2)}%</p>
+      <hr />
+      {total === 0 ? (
+        <p>No feedback given</p>
+      ) : (
+        <div>
+          <Statistics text={"good "} amount={good} />
+          <Statistics text={"neutral "} amount={neutral} />
+          <Statistics text={"bad "} amount={bad} />
+          <Statistics text={"total "} amount={total} />
+          <Statistics avg={"average "} sum={sum} total={total} />
+          <Statistics good={"good% "} amount={good} total={total} />
+        </div>
+      )}
+
       <hr></hr>
       <Statistics text={"good "} amount={good} />
       <Statistics text={"neutral "} amount={neutral} />
