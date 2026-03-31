@@ -210,28 +210,8 @@
 
 // -------------- Tehtävä 1.6 -------------------
 
-import { useState } from "react";
-import Statistics from "./components/Statistics";
-
-const App = () => {
-  // tallenna napit omaan tilaansa
-  const [good, setGood] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0);
-  const [average, setAverage] = useState([]);
-  const total = good + neutral + bad;
-  const sum = average.reduce((a, b) => a + b, 0);
-
-  // console.log(sum);
-  // console.log(average);
-  console.log("good:", good, "total:", total);
-
-  //concat ja join todennäköisesti
-
-  return (
-    <div>
-      <h1>give feedback</h1>
-      <button
+// tehtävät 1.6 - 1.10 sekamelska.
+/* <button
         onClick={() => {
           setGood(good + 1);
           setAverage(average.concat(+1));
@@ -254,16 +234,69 @@ const App = () => {
         }}
       >
         bad
-      </button>
-      <h2>statistics</h2>
-      {/* good, neutral, bad, all, average, good% */}
-      <p>good {good}</p>
+      </button> */
+
+/* <p>good {good}</p>
       <p>neutral {neutral}</p>
       <p>bad {bad}</p>
       <p>total {total}</p>
       <p>average {sum / total}</p>
-      <p>good% {((good / total) * 100).toFixed(2)}%</p>
-      <hr />
+      <p>good% {((good / total) * 100).toFixed(2)}</p>
+      <hr /> */
+
+/* <hr></hr>
+      <Statistics text={"good "} amount={good} />
+      <Statistics text={"neutral "} amount={neutral} />
+      <Statistics text={"bad "} amount={bad} />
+      <Statistics text={"total "} amount={total} />
+      <Statistics avg={"average "} sum={sum} total={total} />
+      <Statistics good={"good% "} amount={good} total={total} /> */
+
+import Button from "./components/Button";
+import { useState } from "react";
+import Statistics from "./components/Statistics";
+
+const App = () => {
+  // tallenna napit omaan tilaansa
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+  const [average, setAverage] = useState([]);
+  const total = good + neutral + bad;
+  const sum = average.reduce((a, b) => a + b, 0);
+
+  const handleGoodClick = () => {
+    setGood(good + 1);
+    setAverage(average.concat(+1));
+  };
+
+  const handleNeutralClick = () => {
+    setNeutral(neutral + 1);
+    setAverage(average.concat(0));
+  };
+
+  const handleBadClick = () => {
+    setBad(bad + 1);
+    setAverage(average.concat(-1));
+  };
+
+  // console.log(sum);
+  // console.log(average);
+  // console.log("good:", good, "total:", total);
+  console.log(good);
+
+  //concat ja join todennäköisesti
+
+  return (
+    <div>
+      <h1>give feedback</h1>
+
+      <Button onClick={handleGoodClick} text="good" />
+      <Button onClick={handleNeutralClick} text="neutral" />
+      <Button onClick={handleBadClick} text="bad" />
+      <h2>statistics</h2>
+
+      {/* good, neutral, bad, all, average, good% */}
       {total === 0 ? (
         <p>No feedback given</p>
       ) : (
@@ -276,14 +309,6 @@ const App = () => {
           <Statistics good={"good% "} amount={good} total={total} />
         </div>
       )}
-
-      <hr></hr>
-      <Statistics text={"good "} amount={good} />
-      <Statistics text={"neutral "} amount={neutral} />
-      <Statistics text={"bad "} amount={bad} />
-      <Statistics text={"total "} amount={total} />
-      <Statistics avg={"average "} sum={sum} total={total} />
-      <Statistics good={"good% "} amount={good} total={total} />
     </div>
   );
 };
