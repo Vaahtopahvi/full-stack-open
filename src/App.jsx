@@ -373,82 +373,104 @@
 //   );
 // };
 
-import { useState } from "react";
-import Phonebook from "./components/Phonebook";
-import PersonForm from "./components/PersonForm";
-import Filter from "./components/Filter";
+// import { useState } from "react";
+// import Phonebook from "./components/Phonebook";
+// import PersonForm from "./components/PersonForm";
+// import Filter from "./components/Filter";
+
+// const App = () => {
+//   const [persons, setPersons] = useState([
+//     { name: "Arto Hellas", number: "040-123456" },
+//     { name: "Ada Lovelace", number: "39-44-5323523" },
+//     { name: "Dan Abramov", number: "12-43-234345" },
+//     { name: "Mary Poppendieck", number: "39-23-6423122" },
+//   ]);
+//   const [newName, setNewName] = useState("");
+//   const [newNumber, setNewNumber] = useState("");
+//   const [showFiltered, setShowFiltered] = useState("");
+
+//   const result = persons.filter((person) =>
+//     person.name.toLowerCase().includes(showFiltered.toLowerCase()),
+//   );
+
+//   return (
+//     <div>
+//       <h2>Phonebook</h2>
+//       <PersonForm
+//         persons={persons}
+//         newName={newName}
+//         setNewName={setNewName}
+//         newNumber={newNumber}
+//         setNewNumber={setNewNumber}
+//         setPersons={setPersons}
+//       />
+//       <Filter showFiltered={showFiltered} setShowFiltered={setShowFiltered} />
+//       <Phonebook luettelo={result} />
+//     </div>
+//   );
+// };
+
+// export default App;
+
+// const showAll = () => {
+//   return result.map((person) => (
+//     <p key={person.name}>
+//       {person.name} {person.number}
+//     </p>
+//   ));
+// };
+
+// const addPerson = (event) => {
+//   event.preventDefault();
+//   if (persons.some((person) => person.name === newName)) {
+//     alert(`${newName} is already added to phonebook`);
+//   } else {
+//     const personObject = { name: newName, number: newNumber };
+//     // console.log("button clicked");
+//     // console.log(personObject);
+
+//     setPersons(persons.concat(personObject));
+//     setNewName("");
+//     setNewNumber("");
+//   }
+// };
+
+// const handleNameChange = (event) => {
+//   // console.log(event.target.value);
+//   setNewName(event.target.value);
+// };
+
+// const handleNumberChange = (event) => {
+//   // console.log(event.target.value);
+//   setNewNumber(event.target.value);
+// };
+
+// const handleFilter = (event) => {
+//   // console.log(event.target.value);
+//   setShowFiltered(event.target.value);
+// };
+
+// console.log(result);
+// console.log(showAll());
+
+import axios from "axios";
+import { useState, useEffect } from "react";
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-123456" },
-    { name: "Ada Lovelace", number: "39-44-5323523" },
-    { name: "Dan Abramov", number: "12-43-234345" },
-    { name: "Mary Poppendieck", number: "39-23-6423122" },
-  ]);
-  const [newName, setNewName] = useState("");
-  const [newNumber, setNewNumber] = useState("");
-  const [showFiltered, setShowFiltered] = useState("");
+  const [names, setNames] = useState([]);
+  // const [showAll, setShowAll] = useState(true)
 
-  const result = persons.filter((person) =>
-    person.name.toLowerCase().includes(showFiltered.toLowerCase()),
-  );
+  useEffect(() => {
+    console.log("effect");
+    axios.get("http://localhost:3001/persons").then((response) => {
+      console.log("promise fulfilled!!");
+      setNames(response.data);
+    });
+  }, []);
+  console.log("render", names.length, "names");
+  console.log(names);
 
-  // const showAll = () => {
-  //   return result.map((person) => (
-  //     <p key={person.name}>
-  //       {person.name} {person.number}
-  //     </p>
-  //   ));
-  // };
-
-  // const addPerson = (event) => {
-  //   event.preventDefault();
-  //   if (persons.some((person) => person.name === newName)) {
-  //     alert(`${newName} is already added to phonebook`);
-  //   } else {
-  //     const personObject = { name: newName, number: newNumber };
-  //     // console.log("button clicked");
-  //     // console.log(personObject);
-
-  //     setPersons(persons.concat(personObject));
-  //     setNewName("");
-  //     setNewNumber("");
-  //   }
-  // };
-
-  // const handleNameChange = (event) => {
-  //   // console.log(event.target.value);
-  //   setNewName(event.target.value);
-  // };
-
-  // const handleNumberChange = (event) => {
-  //   // console.log(event.target.value);
-  //   setNewNumber(event.target.value);
-  // };
-
-  // const handleFilter = (event) => {
-  //   // console.log(event.target.value);
-  //   setShowFiltered(event.target.value);
-  // };
-
-  // console.log(result);
-  // console.log(showAll());
-
-  return (
-    <div>
-      <h2>Phonebook</h2>
-      <PersonForm
-        persons={persons}
-        newName={newName}
-        setNewName={setNewName}
-        newNumber={newNumber}
-        setNewNumber={setNewNumber}
-        setPersons={setPersons}
-      />
-      <Filter showFiltered={showFiltered} setShowFiltered={setShowFiltered} />
-      <Phonebook luettelo={result} />
-    </div>
-  );
+  return <div>hello, here's not the list:</div>;
 };
 
 export default App;
