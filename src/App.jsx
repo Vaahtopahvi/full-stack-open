@@ -373,45 +373,6 @@
 //   );
 // };
 
-// import { useState } from "react";
-// import Phonebook from "./components/Phonebook";
-// import PersonForm from "./components/PersonForm";
-// import Filter from "./components/Filter";
-
-// const App = () => {
-//   const [persons, setPersons] = useState([
-//     { name: "Arto Hellas", number: "040-123456" },
-//     { name: "Ada Lovelace", number: "39-44-5323523" },
-//     { name: "Dan Abramov", number: "12-43-234345" },
-//     { name: "Mary Poppendieck", number: "39-23-6423122" },
-//   ]);
-//   const [newName, setNewName] = useState("");
-//   const [newNumber, setNewNumber] = useState("");
-//   const [showFiltered, setShowFiltered] = useState("");
-
-//   const result = persons.filter((person) =>
-//     person.name.toLowerCase().includes(showFiltered.toLowerCase()),
-//   );
-
-//   return (
-//     <div>
-//       <h2>Phonebook</h2>
-//       <PersonForm
-//         persons={persons}
-//         newName={newName}
-//         setNewName={setNewName}
-//         newNumber={newNumber}
-//         setNewNumber={setNewNumber}
-//         setPersons={setPersons}
-//       />
-//       <Filter showFiltered={showFiltered} setShowFiltered={setShowFiltered} />
-//       <Phonebook luettelo={result} />
-//     </div>
-//   );
-// };
-
-// export default App;
-
 // const showAll = () => {
 //   return result.map((person) => (
 //     <p key={person.name}>
@@ -453,24 +414,125 @@
 // console.log(result);
 // console.log(showAll());
 
-import axios from "axios";
+// import { useState, useEffect } from "react";
+// import axios from "axios";
+// import Note from "./components/Note";
+
+// const App = () => {
+//   const [notes, setNotes] = useState([]);
+//   const [newNote, setNewNote] = useState("");
+//   const [showAll, setShowAll] = useState(true);
+
+//   const Note = ({ note, toggleImportance }) => {
+//     const label = note.important ? "make not important" : "make important";
+
+// jokaisen noten vieree button mikä tekee siitä joko tärkeän tai ei tärkeän <--------------------
+
+//     return (
+//       <li>
+//         {note.content}
+//         <button onClick={toggleImportance}>{label}</button>
+//       </li>
+//     );
+//   };
+
+//   useEffect(() => {
+//     axios.get("http://localhost:3001/notes").then((response) => {
+//       setNotes(response.data);
+//     });
+//   }, []);
+
+//   const addNote = (event) => {
+//     event.preventDefault();
+//     const noteObject = {
+//       content: newNote,
+//       important: Math.random() > 0.5,
+//     };
+
+//     axios.post("http://localhost:3001/notes", noteObject).then((response) => {
+//       setNotes(notes.concat(response.data));
+//       setNewNote("");
+//     });
+//   };
+
+//   const handleNoteChange = (event) => {
+//     setNewNote(event.target.value);
+//   };
+
+//   const notesToShow = showAll ? notes : notes.filter((note) => note.important);
+
+//   return (
+//     <div>
+//       <h1>Notes</h1>
+//       <div>
+//         <button onClick={() => setShowAll(!showAll)}>
+//           show {showAll ? "important" : "all"}
+//         </button>
+//       </div>
+//       <ul>
+//         {notesToShow.map((note) => (
+//           <Note key={note.id} note={note} />
+//         ))}
+//       </ul>
+//       <form onSubmit={addNote}>
+//         <input value={newNote} onChange={handleNoteChange} />
+//         <button type="submit">save</button>
+//       </form>
+//     </div>
+//   );
+// };
+
+// export default App;
+
+import personService from "./services/persons";
 import { useState, useEffect } from "react";
+import Phonebook from "./components/Phonebook";
+import PersonForm from "./components/PersonForm";
+import Filter from "./components/Filter";
 
 const App = () => {
-  const [names, setNames] = useState([]);
-  // const [showAll, setShowAll] = useState(true)
+  const [persons, setPersons] = useState([]);
+  const [newName, setNewName] = useState("");
+  const [newNumber, setNewNumber] = useState("");
+  const [showFiltered, setShowFiltered] = useState("");
 
+  const result = persons.filter((person) =>
+    person.name.toLowerCase().includes(showFiltered.toLowerCase()),
+  );
+
+  // filteröidään ihmiset, jatka tästä
+  personService.filter(name).then((response) => {
+    persons.name.toLowerCase().includes(response.data.toLowerCase());
+  });
+
+  // haetaan ihmiset
   useEffect(() => {
-    console.log("effect");
-    axios.get("http://localhost:3001/persons").then((response) => {
-      console.log("promise fulfilled!!");
-      setNames(response.data);
+    // console.log(personService.getAll());
+    personService.getAll().then((response) => {
+      setPersons(response.data);
+      console.log(persons);
+      console.log("moi");
     });
   }, []);
-  console.log("render", names.length, "names");
-  console.log(names);
 
-  return <div>hello, here's not the list:</div>;
+  return (
+    <div>
+      <h1>Phonebook</h1>
+      <h2>Add new person</h2>
+      <PersonForm
+        persons={persons}
+        newName={newName}
+        setNewName={setNewName}
+        newNumber={newNumber}
+        setNewNumber={setNewNumber}
+        setPersons={setPersons}
+      />
+      <h2>Search</h2>
+      <Filter showFiltered={showFiltered} setShowFiltered={setShowFiltered} />
+      <h2>Numbers</h2>
+      <Phonebook luettelo={result} />
+    </div>
+  );
 };
 
 export default App;
