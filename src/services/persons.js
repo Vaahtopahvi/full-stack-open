@@ -9,12 +9,12 @@ const create = (newObject) => {
   return axios.post(baseUrl, newObject);
 };
 
-const filter = (name) => {
-  return axios.get(`${baseUrl}/${name}`);
+const deletePerson = (id) => {
+  return axios.delete(`${baseUrl}/${id}`);
 };
 
 export default {
   getAll,
   create,
-  filter,
+  deletePerson,
 };
