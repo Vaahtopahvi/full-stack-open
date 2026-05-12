@@ -496,22 +496,42 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [showFiltered, setShowFiltered] = useState("");
 
+  // tämä on OK jättää. jos on vain kymmeniä tai satoja nimiä, suodatus on salamannopeaa tehdä suoraan tässä
   const result = persons.filter((person) =>
     person.name.toLowerCase().includes(showFiltered.toLowerCase()),
   );
 
-  // filteröidään ihmiset, jatka tästä
-  personService.filter(name).then((response) => {
-    persons.name.toLowerCase().includes(response.data.toLowerCase());
-  });
+  const deletePerson = (id, name) => {
+    console.log("nyt aktivoitiin deletePerson");
+    console.log(
+      "the person whose id is " +
+        id +
+        " and name is " +
+        name +
+        " is about to get removed",
+    );
+    //kysytään käyttäjältä haluuko se poistaa nimen listalta
+    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+      //jos joo, niin lähetä kutsu personServiceen ja kutsu deletePersonia, välitä ID.
+      personService.deletePerson(id).then(() => {
+        //sitku tulee vastaus (then) niin filteröi ihminen pois listasta sillä id:llä
+        setPersons(persons.filter((person) => person.id !== id));
+      });
+      console.log("Removed...");
+    } else {
+      console.log("nice");
+    }
+    // const remove = persons.find((n) => n.id === id);
+    // console.log(remove);
+  };
 
   // haetaan ihmiset
   useEffect(() => {
     // console.log(personService.getAll());
     personService.getAll().then((response) => {
       setPersons(response.data);
-      console.log(persons);
-      console.log("moi");
+      // console.log(persons);
+      // console.log("moi");
     });
   }, []);
 
@@ -530,7 +550,11 @@ const App = () => {
       <h2>Search</h2>
       <Filter showFiltered={showFiltered} setShowFiltered={setShowFiltered} />
       <h2>Numbers</h2>
-      <Phonebook luettelo={result} />
+      <Phonebook
+        luettelo={result}
+        deletePerson={(id, name) => deletePerson(id, name)}
+        //näemmä toimisi ihan vaan deleteperson={deletePerson} myös
+      />
     </div>
   );
 };
