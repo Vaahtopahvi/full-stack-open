@@ -486,21 +486,24 @@
 
 import personService from "./services/persons";
 import { useState, useEffect } from "react";
+import Filter from "./components/Filter";
+import Notification from "./components/Notification";
 import Phonebook from "./components/Phonebook";
 import PersonForm from "./components/PersonForm";
-import Filter from "./components/Filter";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [showFiltered, setShowFiltered] = useState("");
+  const [toast, setToast] = useState(null);
 
   // tämä on OK jättää. jos on vain kymmeniä tai satoja nimiä, suodatus on salamannopeaa tehdä suoraan tässä
   const result = persons.filter((person) =>
     person.name.toLowerCase().includes(showFiltered.toLowerCase()),
   );
 
+  // tän vois siirtää omaan komponenttiin
   const deletePerson = (id, name) => {
     console.log("nyt aktivoitiin deletePerson");
     console.log(
@@ -517,6 +520,12 @@ const App = () => {
         //sitku tulee vastaus (then) niin filteröi ihminen pois listasta sillä id:llä
         setPersons(persons.filter((person) => person.id !== id));
       });
+      // onnistumisviesti ja ajastin setToastille
+      setToast(`Deleted ${name}`);
+
+      setTimeout(() => {
+        setToast(null);
+      }, 5000);
       console.log("Removed...");
     } else {
       console.log("nice");
@@ -538,6 +547,8 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      {/* toastin paikka */}
+      <Notification message={toast} />
       <h2>Add new person</h2>
       <PersonForm
         persons={persons}
@@ -546,6 +557,8 @@ const App = () => {
         newNumber={newNumber}
         setNewNumber={setNewNumber}
         setPersons={setPersons}
+        // täytyy antaa person formin määritellä setToastin tila
+        setToast={setToast}
       />
       <h2>Search</h2>
       <Filter showFiltered={showFiltered} setShowFiltered={setShowFiltered} />
