@@ -25,6 +25,12 @@ const PersonForm = (props) => {
                 changedNumber.id === person.id ? changedNumber : person,
               ),
             );
+            // onnistumisviesti ja ajastin setToastille
+            props.setToast(`Updated ${props.newName}'s number`);
+
+            setTimeout(() => {
+              props.setToast(null);
+            }, 5000);
             props.setNewName("");
             props.setNewNumber("");
           });
@@ -33,6 +39,13 @@ const PersonForm = (props) => {
       const personObject = { name: props.newName, number: props.newNumber };
       personService.create(personObject).then((response) => {
         props.setPersons(props.persons.concat(response.data));
+
+        // onnistumisviesti ja ajastin setToastille
+        props.setToast(`Added ${props.newName}`);
+
+        setTimeout(() => {
+          props.setToast(null);
+        }, 5000);
         props.setNewName("");
         props.setNewNumber("");
       });
