@@ -19,21 +19,28 @@ const PersonForm = (props) => {
         personService
           .update(changedNumber.id, changedNumber)
           .then((response) => {
-            console.log(response);
+            console.log(response); // käytä responsen dataa
             props.setPersons(
               props.persons.map((person) =>
-                changedNumber.id === person.id ? changedNumber : person,
+                changedNumber.id === person.id ? response.data : person,
               ),
             );
-            // onnistumisviesti ja ajastin setToastille
-            props.setToast(`Updated ${props.newName}'s number`);
-
-            setTimeout(() => {
-              props.setToast(null);
-            }, 5000);
-            props.setNewName("");
-            props.setNewNumber("");
+          })
+          .catch((error) => {
+            console.log(error);
+            props.setToast({
+              message: `Information of ${props.newName} has already been removed from server`,
+              type: "error",
+            });
           });
+        // onnistumisviesti ja ajastin setToastille
+        props.setToast(`Updated ${props.newName}'s number`);
+
+        setTimeout(() => {
+          props.setToast(null);
+        }, 5000);
+        props.setNewName("");
+        props.setNewNumber("");
       }
     } else {
       const personObject = { name: props.newName, number: props.newNumber };
