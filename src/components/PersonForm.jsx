@@ -9,7 +9,7 @@ const PersonForm = (props) => {
         `${props.newName} is already added to phonebook, replace the old number with a new one?`,
       );
       {
-        // APUAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        // APUAAAAAAAAAAAAAAAAAAAAAAAAAAAAA (nimen päivitys)
         const personName = props.persons.find(
           (person) => person.name === props.newName,
         );
@@ -29,7 +29,7 @@ const PersonForm = (props) => {
           .catch((error) => {
             console.log(error);
             props.setToast({
-              message: `Information of ${props.newName} has already been removed from server`,
+              message: `Information of ${props.newName} has already been removed from server, please refresh the page`,
               type: "error",
             });
           });
@@ -47,8 +47,8 @@ const PersonForm = (props) => {
       personService.create(personObject).then((response) => {
         props.setPersons(props.persons.concat(response.data));
 
-        // onnistumisviesti ja ajastin setToastille
-        props.setToast(`Added ${props.newName}`);
+        // onnistumisviesti ja ajastin setToastille. nice pystyy passaa myös objekteja.
+        props.setToast({ message: `Added ${props.newName}`, type: "success" });
 
         setTimeout(() => {
           props.setToast(null);
