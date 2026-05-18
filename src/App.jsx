@@ -521,7 +521,7 @@ const App = () => {
         setPersons(persons.filter((person) => person.id !== id));
       });
       // onnistumisviesti ja ajastin setToastille
-      setToast(`Deleted ${name}`);
+      setToast({ message: `Deleted ${name}`, type: "success" });
 
       setTimeout(() => {
         setToast(null);
