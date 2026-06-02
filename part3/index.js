@@ -1,6 +1,6 @@
 import express from "express";
 // import http from "http";
-// import { createLogger } from "vite";
+import { createLogger } from "vite";
 
 const app = express();
 
@@ -40,6 +40,15 @@ app.get("/", (request, response) => {
   // console.log(request);
 });
 
+// info sivu
+app.get("/info", (request, response) => {
+  const now = new Date();
+  const length = persons.length;
+  // console.log(length);
+
+  response.send(`<p>Phonebook has info for ${length} people.</p>` + now);
+});
+
 // api/persons -päätepiste, joka palauttaa puhelinluettelon henkilöt JSON-muodossa
 app.get("/api/persons", (request, response) => {
   response.json(persons);
@@ -58,6 +67,12 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 // yksittäisen henkilön poisto
+app.delete("/api/persons/:id", (request, response) => {
+  const id = request.params.id;
+  persons = persons.filter((person) => person.id !== id);
+
+  response.status(204).end();
+});
 
 // const app = http.createServer((request, response) => {
 //   response.writeHead(200, { "Content-Type": "application/json" });
