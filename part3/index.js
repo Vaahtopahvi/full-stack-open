@@ -3,6 +3,7 @@ import express from "express";
 import { createLogger } from "vite";
 
 const app = express();
+app.use(express.json());
 
 let persons = [
   {
@@ -52,6 +53,38 @@ app.get("/info", (request, response) => {
 // api/persons -päätepiste, joka palauttaa puhelinluettelon henkilöt JSON-muodossa
 app.get("/api/persons", (request, response) => {
   response.json(persons);
+});
+
+const generateId = () => {
+  const randomId = Math.floor(Math.random() * 100000);
+  return String(randomId);
+};
+
+// console.log(generateId());
+
+// uuden henkilön lisäys
+app.post("/api/persons", (request, response) => {
+  const person = request.body;
+  console.log(person);
+  // console.log(person.name);
+
+  if (!person.name || !person.number) {
+    return response.status(400).json({
+      error: "name or number missing",
+    });
+  }
+
+  const poop = {
+    name: person.name,
+    number: person.number,
+    id: generateId(),
+  };
+
+  persons = persons.concat(poop);
+
+  response.json(person);
+  // console.log(person);
+  console.log(persons);
 });
 
 // yksittäisen henkilön tiedot id:n perusteella
