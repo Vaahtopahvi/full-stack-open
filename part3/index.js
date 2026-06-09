@@ -61,6 +61,14 @@ const generateId = () => {
 };
 
 // console.log(generateId());
+console.log(persons);
+// const existingPerson = persons.some((p) => p.name === "arto hellas");
+// console.log(existingPerson);
+// // console.log(persons);
+// // let result = persons.map((per) => per.name.toLowerCase());
+// // console.log(result);
+// // console.log("arto hellas" === result[0]);
+// console.log(existingPerson);
 
 // uuden henkilön lisäys
 app.post("/api/persons", (request, response) => {
@@ -68,19 +76,32 @@ app.post("/api/persons", (request, response) => {
   console.log(person);
   // console.log(person.name);
 
+  // uuden henkilön lisäyksen virhekäsittelyt. Jos ei ole jompaa kumpaa kenttää
   if (!person.name || !person.number) {
     return response.status(400).json({
       error: "name or number missing",
     });
+    // jos nimi on jo listalla
+  } else if (
+    persons.some((p) => p.name.toLowerCase() === person.name.toLowerCase())
+  ) {
+    return response.status(400).json({
+      error: "name must be unique",
+    }); //jos puhelinnumero on jo listalla
+  } else if (persons.some((n) => n.number === person.number)) {
+    return response.status(400).json({
+      error: "number must be unique",
+    });
   }
 
-  const poop = {
+  // lisää lopulta uusi henkilö listaan
+  const addNewPerson = {
     name: person.name,
     number: person.number,
     id: generateId(),
   };
 
-  persons = persons.concat(poop);
+  persons = persons.concat(addNewPerson);
 
   response.json(person);
   // console.log(person);
