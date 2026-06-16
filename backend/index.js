@@ -1,6 +1,5 @@
 import express from "express";
 // import http from "http";
-import { createLogger } from "vite";
 import morgan from "morgan";
 
 const app = express();
@@ -47,8 +46,6 @@ let persons = [
     id: "3tZ_1Lgp4Ko",
   },
 ];
-
-// console.log(appi);
 
 // juurihakemisto
 app.get("/", (request, response) => {
