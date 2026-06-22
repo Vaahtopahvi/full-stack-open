@@ -1,8 +1,10 @@
 import express from "express";
 // import http from "http";
 import morgan from "morgan";
+import cors from "cors";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(
   morgan(function (tokens, req, res) {
@@ -132,7 +134,7 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
-// yksittäisen henkilön poisto
+// yksittäisen henkilön poisto listalta id:n perusteella
 app.delete("/api/persons/:id", (request, response) => {
   const id = request.params.id;
   persons = persons.filter((person) => person.id !== id);
@@ -145,6 +147,7 @@ app.delete("/api/persons/:id", (request, response) => {
 //   response.end(JSON.stringify(persons));
 // });
 
-const PORT = 3001;
-app.listen(PORT);
-console.log(`Server running on port ${PORT}`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
