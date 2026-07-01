@@ -1,7 +1,6 @@
 import express from "express";
 // import http from "http";
 import morgan from "morgan";
-import cors from "cors";
 
 const app = express();
 app.use(express.static("dist"));
