@@ -1,7 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 // import http from "http";
 import morgan from "morgan";
 import mongoose from "mongoose";
+import Person from "./models/person.js";
 
 const app = express();
 app.use(express.static("dist"));
@@ -21,26 +24,11 @@ app.use(
   }),
 );
 
-if (process.argv.length < 3) {
-  console.log("give password as argument");
-  process.exit(1);
-}
+const PORT = process.env.PORT;
+const name = process.argv[2];
+const number = process.argv[3];
 
-const password = process.argv[2];
-const name = process.argv[3];
-const number = process.argv[4];
-const url = `mongodb+srv://phonebook:${password}@cluster0.xrhvpjo.mongodb.net/phonebook?appName=Cluster0`;
-
-mongoose.set("strictQuery", false);
-mongoose.connect(url, { family: 4 });
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-});
-
-const Person = mongoose.model("Person", personSchema);
-
+// api/persons -päätepiste, joka palauttaa puhelinluettelon henkilöt JSON-muodossa, kutsumalla json metodia
 app.get("/api/persons", (request, response) => {
   Person.find({}).then((result) => {
     console.log(result);
@@ -77,6 +65,8 @@ let persons = [
   },
 ];
 
+// console.log("mikä on " + Person);
+
 // juurihakemisto
 app.get("/", (request, response) => {
   response.send("<h1>Hello</h1> <h2>world</h2> <li>exclamation mark!</li>");
@@ -85,37 +75,29 @@ app.get("/", (request, response) => {
 
 // info sivu
 app.get("/info", (request, response) => {
-  const now = new Date();
-  const length = persons.length;
-  // console.log(length);
+  Person.find({}).then((result) => {
+    const now = new Date();
+    const length = result.length;
 
-  response.send(`<p>Phonebook has info for ${length} people.</p>` + now);
+    response.send(`<p>Phonebook has info for ${length} people.</p>` + now);
+  });
 });
 
-// api/persons -päätepiste, joka palauttaa puhelinluettelon henkilöt JSON-muodossa
-app.get("/api/persons", (request, response) => {
-  response.json(persons);
-});
+// // api/persons -päätepiste, joka palauttaa puhelinluettelon henkilöt JSON-muodossa, kutsumalla metodia
+// app.get("/api/persons", (request, response) => {
+//   response.json(persons);
+// });
 
 const generateId = () => {
   const randomId = Math.floor(Math.random() * 100000);
   return String(randomId);
 };
 
-// console.log(generateId());
-console.log(persons);
-// const existingPerson = persons.some((p) => p.name === "arto hellas");
-// console.log(existingPerson);
-// // console.log(persons);
-// // let result = persons.map((per) => per.name.toLowerCase());
-// // console.log(result);
-// // console.log("arto hellas" === result[0]);
-// console.log(existingPerson);
-
 // uuden henkilön lisäys
 app.post("/api/persons", (request, response) => {
-  const person = request.body;
-  console.log(person);
+  const person = new Person(request.body);
+
+  console.log("tallennetaan henkilö: " + person);
   // console.log(person.name);
 
   // uuden henkilön lisäyksen virhekäsittelyt. Jos ei ole jompaa kumpaa kenttää
@@ -123,59 +105,70 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).json({
       error: "name or number missing",
     });
-    // jos nimi on jo listalla
-  } else if (
-    persons.some((p) => p.name.toLowerCase() === person.name.toLowerCase())
-  ) {
-    return response.status(400).json({
-      error: "name must be unique",
-    }); //jos puhelinnumero on jo listalla
-  } else if (persons.some((n) => n.number === person.number)) {
-    return response.status(400).json({
-      error: "number must be unique",
-    });
   }
+  // jos nimi on jo listalla
+  Person.find({}).then((persons) => {
+    // muuttuja vertailevalle nimi arvolle
+    const nameExists = persons.some(
+      (savedPerson) =>
+        savedPerson.name.toLowerCase() === person.name.toLowerCase(),
+    );
+    // muuttuja vertailevalle numero arvolle
+    const numberExists = persons.some(
+      (savedPerson) => savedPerson.number === person.number,
+    );
 
-  // lisää lopulta uusi henkilö listaan
-  const addNewPerson = {
-    name: person.name,
-    number: person.number,
-    id: generateId(),
-  };
+    // jos nimi löytyy jo listalta
+    if (nameExists) {
+      return response.status(400).json({ error: "name must be unique" });
+    }
 
-  persons = persons.concat(addNewPerson);
+    // jos numero löytyy jo listalta
+    if (numberExists) {
+      return response.status(400).json({ error: "number must be unique" });
+    }
+    person.save().then((result) => {
+      response.json(result);
+      console.log("person saved!");
+      console.log(result);
+    });
+  });
 
-  response.json(person);
-  // console.log(person);
   console.log(persons);
 });
 
 // yksittäisen henkilön tiedot id:n perusteella
 app.get("/api/persons/:id", (request, response) => {
-  const id = request.params.id;
-  const person = persons.find((person) => person.id === id);
+  const personId = request.params.id;
 
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
-  }
+  Person.find({}).then((persons) => {
+    // muuttuja vertailevalle id arvolle
+    const person = persons.find((savedPerson) => savedPerson.id === personId);
+    if (person) {
+      response.json(person);
+    } else {
+      response.status(404).end();
+    }
+  });
 });
 
 // yksittäisen henkilön poisto listalta id:n perusteella
 app.delete("/api/persons/:id", (request, response) => {
-  const id = request.params.id;
-  persons = persons.filter((person) => person.id !== id);
+  const personId = request.params.id;
+  Person.find({}).then((persons) => {
+    //muuttuja vertailevalle id arvolle
+    const person = persons.find((savedPerson) => savedPerson.id === personId);
 
-  response.status(204).end();
+    if (!person) {
+      return response.status(404).end();
+    }
+    person.deleteOne().then(() => {
+      response.status(204).end();
+    });
+  });
 });
 
-// const app = http.createServer((request, response) => {
-//   response.writeHead(200, { "Content-Type": "application/json" });
-//   response.end(JSON.stringify(persons));
-// });
-
-const PORT = process.env.PORT || 3001;
+// const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
