@@ -94,7 +94,7 @@ const generateId = () => {
 };
 
 // uuden henkilön lisäys
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const person = new Person(request.body);
 
   console.log("tallennetaan henkilö: " + person);
@@ -107,66 +107,98 @@ app.post("/api/persons", (request, response) => {
     });
   }
   // jos nimi on jo listalla
-  Person.find({}).then((persons) => {
-    // muuttuja vertailevalle nimi arvolle
-    const nameExists = persons.some(
-      (savedPerson) =>
-        savedPerson.name.toLowerCase() === person.name.toLowerCase(),
-    );
-    // muuttuja vertailevalle numero arvolle
-    const numberExists = persons.some(
-      (savedPerson) => savedPerson.number === person.number,
-    );
+  Person.find({})
+    .then((persons) => {
+      // muuttuja vertailevalle nimi arvolle
+      const nameExists = persons.some(
+        (savedPerson) =>
+          savedPerson.name.toLowerCase() === person.name.toLowerCase(),
+      );
+      // muuttuja vertailevalle numero arvolle
+      const numberExists = persons.some(
+        (savedPerson) => savedPerson.number === person.number,
+      );
 
-    // jos nimi löytyy jo listalta
-    if (nameExists) {
-      return response.status(400).json({ error: "name must be unique" });
-    }
+      // jos nimi löytyy jo listalta
+      if (nameExists) {
+        return response.status(400).json({ error: "name must be unique" });
+      }
 
-    // jos numero löytyy jo listalta
-    if (numberExists) {
-      return response.status(400).json({ error: "number must be unique" });
-    }
-    person.save().then((result) => {
-      response.json(result);
-      console.log("person saved!");
-      console.log(result);
-    });
-  });
+      // jos numero löytyy jo listalta
+      if (numberExists) {
+        return response.status(400).json({ error: "number must be unique" });
+      }
+      return person.save();
+    })
+    .then((savedPerson) => {
+      if (savedPerson) {
+        response.json(savedPerson);
+      }
+    })
+    .catch((error) => next(error));
 
-  console.log(persons);
+  // console.log(persons);
 });
 
 // yksittäisen henkilön tiedot id:n perusteella
-app.get("/api/persons/:id", (request, response) => {
-  const personId = request.params.id;
-
-  Person.find({}).then((persons) => {
-    // muuttuja vertailevalle id arvolle
-    const person = persons.find((savedPerson) => savedPerson.id === personId);
-    if (person) {
-      response.json(person);
-    } else {
-      response.status(404).end();
-    }
-  });
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
 // yksittäisen henkilön poisto listalta id:n perusteella
-app.delete("/api/persons/:id", (request, response) => {
-  const personId = request.params.id;
-  Person.find({}).then((persons) => {
-    //muuttuja vertailevalle id arvolle
-    const person = persons.find((savedPerson) => savedPerson.id === personId);
-
-    if (!person) {
-      return response.status(404).end();
-    }
-    person.deleteOne().then(() => {
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then((result) => {
+      // console.log("tässä näkyy result" + result);
       response.status(204).end();
-    });
-  });
+    })
+    .catch((error) => next(error));
 });
+
+// numeron päivitys yhteystiedolle
+app.put("/api/persons/:id", (request, response, next) => {
+  const updatedPerson = {
+    name: request.body.name,
+    number: request.body.number,
+  };
+
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (!person) {
+        return response.status(404).end();
+      }
+
+      person.name = updatedPerson.name;
+      person.number = updatedPerson.number;
+
+      return person.save().then((updatedPerson) => {
+        console.log("Person updated:", updatedPerson);
+        response.json(updatedPerson);
+      });
+    })
+    .catch((error) => next(error));
+});
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+
+// tämä tulee kaikkien muiden middlewarejen ja routejen rekisteröinnin jälkeen!
+app.use(errorHandler);
 
 // const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
