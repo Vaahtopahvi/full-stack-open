@@ -34,7 +34,10 @@ const PersonForm = (props) => {
             });
           });
         // onnistumisviesti ja ajastin setToastille
-        props.setToast(`Updated ${props.newName}'s number`);
+        props.setToast({
+          message: `Updated ${props.newName}'s number`,
+          type: "success",
+        });
 
         setTimeout(() => {
           props.setToast(null);
