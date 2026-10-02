@@ -47,18 +47,32 @@ const PersonForm = (props) => {
       }
     } else {
       const personObject = { name: props.newName, number: props.newNumber };
-      personService.create(personObject).then((response) => {
-        props.setPersons(props.persons.concat(response.data));
+      personService
+        .create(personObject)
+        .then((response) => {
+          props.setPersons(props.persons.concat(response.data));
 
-        // onnistumisviesti ja ajastin setToastille. nice pystyy passaa myös objekteja.
-        props.setToast({ message: `Added ${props.newName}`, type: "success" });
+          // onnistumisviesti ja ajastin setToastille. nice pystyy passaa myös objekteja.
+          props.setToast({
+            message: `Added ${props.newName}`,
+            type: "success",
+          });
 
-        setTimeout(() => {
-          props.setToast(null);
-        }, 5000);
-        props.setNewName("");
-        props.setNewNumber("");
-      });
+          setTimeout(() => {
+            props.setToast(null);
+          }, 5000);
+          props.setNewName("");
+          props.setNewNumber("");
+        })
+        .catch((error) => {
+          const message = error.response.data.error;
+          props.setToast({ message, type: "error" });
+          console.log(error);
+
+          setTimeout(() => {
+            props.setToast(null);
+          }, 5000);
+        });
       // console.log("button clicked");
       // console.log(personObject);
     }
