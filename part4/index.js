@@ -1,31 +1,21 @@
 import dotenv from 'dotenv'
 dotenv.config()
 import express from 'express'
-import mongoose from 'mongoose'
+// import mongoose from 'mongoose'
+import Blog from './models/blog.js'
 
 const app = express()
+//middleware
 app.use(express.json())
 
-const blogSchema = mongoose.Schema({
-  title: String,
-  author: String,
-  url: String,
-  likes: Number,
-})
-
-const Blog = mongoose.model('Blog', blogSchema)
-
-const url = process.env.MONGODB_URI
-mongoose.connect(url, { family: 4 })
-
-app.use(express.json())
-
+// get all blogs
 app.get('/api/blogs', (request, response) => {
   Blog.find({}).then((blogs) => {
     response.json(blogs)
   })
 })
 
+// add new blog
 app.post('/api/blogs', (request, response) => {
   const blog = new Blog(request.body)
 
