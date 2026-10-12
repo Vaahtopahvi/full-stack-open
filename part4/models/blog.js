@@ -4,7 +4,7 @@ dotenv.config()
 import mongoose from 'mongoose'
 
 // mongoose.set('strictQuery', false)
-
+// something
 const url = process.env.MONGODB_URI
 
 console.log('connecting to mongoDB')
