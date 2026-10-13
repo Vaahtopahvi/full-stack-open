@@ -14,4 +14,13 @@ const average = (array) => {
   return array.reduce(reducer, 0) / array.length
 }
 
-export default { dummy, total, average }
+const favoriteBlog = (blogs) => {
+  return blogs.reduce((favorite, blog) => {
+    if (blog.likes > favorite.likes) {
+      return blog
+    }
+    return favorite
+  }, blogs[0])
+}
+
+export default { dummy, total, average, favoriteBlog }
