@@ -5,11 +5,14 @@ import mongoose from 'mongoose'
 
 // mongoose.set('strictQuery', false)
 // something
-const url = process.env.MONGODB_URI
+const MONGODB_URI =
+  process.env.NODE_ENV === 'test'
+    ? process.env.TEST_MONGODB_URI
+    : process.env.MONGODB_URI
 
 console.log('connecting to mongoDB')
 mongoose
-  .connect(url, { family: 4 })
+  .connect(MONGODB_URI, { family: 4 })
   .then(() => {
     console.log('connection established!')
   })
