@@ -2,17 +2,11 @@
 import dotenv from 'dotenv'
 dotenv.config()
 import mongoose from 'mongoose'
-
-// mongoose.set('strictQuery', false)
-// something
-const MONGODB_URI =
-  process.env.NODE_ENV === 'test'
-    ? process.env.TEST_MONGODB_URI
-    : process.env.MONGODB_URI
+import config from '../utils/config.js'
 
 console.log('connecting to mongoDB')
 mongoose
-  .connect(MONGODB_URI, { family: 4 })
+  .connect(config.MONGODB_URI, { family: 4 })
   .then(() => {
     console.log('connection established!')
   })
