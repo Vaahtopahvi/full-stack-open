@@ -88,8 +88,32 @@ test('change like count to zero, if no likes are provided', async () => {
   const response = await api.get('/api/blogs')
   // console.log(response.body)
   const addedBlog = response.body.find((blog) => blog.title === newBlog.title)
-  console.log(addedBlog)
+  // console.log(addedBlog)
   assert.deepStrictEqual(addedBlog.likes, 0)
+})
+
+test('send error 400 if blog has no title', async () => {
+  const newBlog = {
+    author: 'Hoo Lee Sheet',
+    url: 'https://redarmy.cn',
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+})
+
+test('send error 400 if blog has no url', async () => {
+  const newBlog = {
+    title: 'Jinpings Dynastia',
+    author: 'Hoo Lee Sheet',
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
 })
 
 after(async () => {

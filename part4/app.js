@@ -17,9 +17,13 @@ app.get('/api/blogs', (request, response) => {
 app.post('/api/blogs', (request, response) => {
   const blog = new Blog(request.body)
 
-  blog.save().then((result) => {
-    response.status(201).json(result)
-  })
+  if (!blog.title || !blog.url) {
+    response.status(400).json()
+  } else {
+    blog.save().then((result) => {
+      response.status(201).json(result)
+    })
+  }
 })
 
 export default app
