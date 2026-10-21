@@ -51,7 +51,7 @@ test('all blogs are returned', async () => {
 
 test('a valid blog can be added ', async () => {
   const newBlog = {
-    title: 'Type shit',
+    title: 'Type shi',
     author: 'Riku Vöx',
     url: 'https://google.fi',
     likes: 67,
@@ -70,7 +70,26 @@ test('a valid blog can be added ', async () => {
 
   assert.strictEqual(response.body.length, helper.initialBlogs.length + 1)
 
-  assert(contents.includes('Type shit'))
+  assert(contents.includes('Type shi'))
+})
+
+test('change like count to zero, if no likes are provided', async () => {
+  const newBlog = {
+    title: 'Jinpings Dynastia',
+    author: 'Hoo Lee Sheet',
+    url: 'https://redarmy.cn',
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+  // console.log(response.body)
+  const addedBlog = response.body.find((blog) => blog.title === newBlog.title)
+  console.log(addedBlog)
+  assert.deepStrictEqual(addedBlog.likes, 0)
 })
 
 after(async () => {
