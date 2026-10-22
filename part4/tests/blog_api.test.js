@@ -1,4 +1,4 @@
-import { test, after, beforeEach } from 'node:test'
+import { test, after, beforeEach, describe } from 'node:test'
 import assert from 'node:assert'
 import mongoose from 'mongoose'
 import supertest from 'supertest'
@@ -114,6 +114,50 @@ test('send error 400 if blog has no url', async () => {
     .send(newBlog)
     .expect(400)
     .expect('Content-Type', /application\/json/)
+})
+
+describe('deletion of a blog', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    // blogit alussa
+    const blogsAtStart = await helper.blogsInDb()
+    // NOTE: Promise.all suorittaa kaikkia syötteenä saamiaan promiseja rinnakkain
+    // console.log(blogsAtStart)
+    const blogToDelete = blogsAtStart[0]
+    // console.log('blog to delete', blogToDelete)
+
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+
+    // blogit poiston jälkeen
+    const blogsAtEnd = await helper.blogsInDb()
+    // console.log(blogsAtEnd)
+
+    const ids = blogsAtEnd.map((n) => n.id)
+    assert(!ids.includes(blogToDelete.id))
+
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1)
+  })
+})
+
+test('succeeds with status code 200 if update is success', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+
+  const blogToEdit = blogsAtStart[0]
+  // console.log(blogToEdit)
+  const expectedLikes = blogToEdit.likes + 1
+  // console.log(expectedLikes)
+
+  await api
+    .put(`/api/blogs/${blogToEdit.id}`)
+    .send({ likes: expectedLikes })
+    .expect(200)
+
+  //blogit muokkauksen jälkeen
+  const blogsAtEnd = await helper.blogsInDb()
+  const editedBlog = blogsAtEnd.find((blog) => blog.id === blogToEdit.id)
+  // console.log('tässä on edited blog', blogToEdit)
+
+  // assert.equal(editedBlog.body.likes, expectedLikes)
+  assert.deepStrictEqual(editedBlog.likes, expectedLikes)
 })
 
 after(async () => {
