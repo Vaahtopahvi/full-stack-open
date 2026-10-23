@@ -155,7 +155,7 @@ test('succeeds with status code 200 if update is success', async () => {
   const blogsAtEnd = await helper.blogsInDb()
   const editedBlog = blogsAtEnd.find((blog) => blog.id === blogToEdit.id)
   // console.log('tässä on edited blog', blogToEdit)
-
+  // console.log('very important update: made a clog function again :D')
   // assert.equal(editedBlog.body.likes, expectedLikes)
   assert.deepStrictEqual(editedBlog.likes, expectedLikes)
 })
