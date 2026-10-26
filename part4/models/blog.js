@@ -4,15 +4,23 @@ dotenv.config()
 import mongoose from 'mongoose'
 import config from '../utils/config.js'
 
-console.log('connecting to mongoDB')
+// console.log('connecting to mongoDB')
 mongoose
   .connect(config.MONGODB_URI, { family: 4 })
   .then(() => {
-    console.log('connection established!')
+    // console.log('connection established!')
   })
   .catch((error) => {
     console.log('error connecting to MongoDB', error.message)
   })
+
+//try await catch homma
+//   try {
+//   await mongoose.connect(config.MONGODB_URI, { family: 4 })
+// } catch (error) {
+//   console.error('Error connecting to MongoDB:', error.message)
+//   throw error
+// }
 
 const blogSchema = new mongoose.Schema({
   title: String,
