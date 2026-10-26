@@ -1,4 +1,5 @@
-import { test, describe } from 'node:test'
+import { test, describe, after } from 'node:test'
+import mongoose from 'mongoose'
 import assert from 'node:assert'
 import listHelper from '../utils/list_helper.js'
 
@@ -60,4 +61,8 @@ describe('total likes', () => {
   // test('of empty array is zero', () => {
   //   assert.strictEqual(listHelper.average([]), 0)
   // })
+})
+
+after(async () => {
+  await mongoose.connection.close()
 })

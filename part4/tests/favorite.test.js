@@ -1,4 +1,5 @@
-import { test, describe } from 'node:test'
+import { test, describe, after } from 'node:test'
+import mongoose from 'mongoose'
 import assert from 'node:assert'
 import listHelper from '../utils/list_helper.js'
 
@@ -55,7 +56,12 @@ describe('favorite list', () => {
   ]
   test('when one blog has the most likes', () => {
     const result = listHelper.favoriteBlog(blogs)
-    console.log(result)
+    // näyttää blogin jolla on eniten tykkäyksiä
+    // console.log(result)
     assert.deepStrictEqual(result, blogs[2])
   })
+})
+
+after(async () => {
+  await mongoose.connection.close()
 })

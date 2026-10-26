@@ -10,7 +10,7 @@ const api = supertest(app)
 
 beforeEach(async () => {
   await Blog.deleteMany({})
-  console.log('cleared!')
+  // console.log('cleared!')
 
   // luodaan muuttuja, johon tallennetaan helper taulukossa olevia JS-olioita vastaavat
   // Blog konstruktorifunktiolla generoidut mongoose oliot.
