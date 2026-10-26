@@ -1,10 +1,12 @@
 import express from 'express'
 // import mongoose from 'mongoose'
 import Blog from './models/blog.js'
+import usersRouter from './controllers/users.js'
 
 const app = express()
 //middleware
 app.use(express.json())
+app.use('/api/users/', usersRouter)
 
 // get all blogs
 app.get('/api/blogs', (request, response) => {
