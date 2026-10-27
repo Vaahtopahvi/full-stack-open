@@ -1,6 +1,7 @@
 import express from 'express'
 // import mongoose from 'mongoose'
 import Blog from './models/blog.js'
+import User from './models/user.js'
 import usersRouter from './controllers/users.js'
 
 const app = express()
@@ -9,22 +10,37 @@ app.use(express.json())
 app.use('/api/users/', usersRouter)
 
 // get all blogs
-app.get('/api/blogs', (request, response) => {
-  Blog.find({}).then((blogs) => {
-    response.json(blogs)
-  })
+app.get('/api/blogs', async (request, response) => {
+  const blogs = await Blog.find({}).populate('user', 'username name')
+  response.json(blogs)
 })
 
 // add new blog
-app.post('/api/blogs', (request, response) => {
-  const blog = new Blog(request.body)
+app.post('/api/blogs', async (request, response) => {
+  // get the first user in db with no conditions ({})
+  const user = await User.findOne({})
+  if (!user) {
+    return response.status(400).json({ error: 'userId missing or not valid' })
+  }
+  // console.log('tässä on user', user, ' ja tässä on user id', user._id)
+
+  // copy the fields from the submitted blog into this new object
+  // add user separately because client isn't choosing it
+  const blog = new Blog({ ...request.body, user: user._id })
+  // console.log(user)
 
   if (!blog.title || !blog.url) {
     response.status(400).json()
   } else {
-    blog.save().then((result) => {
-      response.status(201).json(result)
-    })
+    // odotetaan blogin tallennusta
+    const savedBlog = await blog.save()
+
+    // liitetään uusi blogi sen luoneeseen käyttäjään
+    user.blogs = user.blogs.concat(savedBlog)
+    await user.save()
+
+    // lähetetään myöntävä vastaus takaisin + blogi
+    response.status(201).json(savedBlog)
   }
 })
 
