@@ -3,11 +3,13 @@ import express from 'express'
 import Blog from './models/blog.js'
 import User from './models/user.js'
 import usersRouter from './controllers/users.js'
+import loginRouter from './controllers/login.js'
 
 const app = express()
 //middleware
 app.use(express.json())
 app.use('/api/users/', usersRouter)
+app.use('/api/login', loginRouter)
 
 // get all blogs
 app.get('/api/blogs', async (request, response) => {
