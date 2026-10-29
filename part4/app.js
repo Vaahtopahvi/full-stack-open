@@ -1,5 +1,6 @@
 import express from 'express'
 // import mongoose from 'mongoose'
+import logger from './utils/logger.js'
 import Blog from './models/blog.js'
 import User from './models/user.js'
 import usersRouter from './controllers/users.js'
@@ -32,39 +33,36 @@ const getTokenFrom = (request) => {
 app.post('/api/blogs', async (request, response) => {
   // copy the fields from the submitted blog into this new object
   //ensin tehdään tämä
-  try {
-    // verify the token first
-    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-    if (!decodedToken.id) {
-      return response.status(401).json({ error: 'token invalid' })
-    }
 
-    // find the user
-    const user = await User.findById(decodedToken.id)
-    // create the blog using user._id
-    const blog = new Blog({ ...request.body, user: user._id })
-    console.log(blog)
-
-    if (!blog.title || !blog.url) {
-      return response.status(400).json()
-    }
-
-    // odotetaan blogin tallennusta
-    const savedBlog = await blog.save()
-
-    // liitetään uusi blogi sen luoneeseen käyttäjään
-    user.blogs = user.blogs.concat(savedBlog)
-    await user.save()
-
-    // lähetetään myöntävä vastaus takaisin + blogi
-    response.status(201).json(savedBlog)
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      console.log(error.message)
-      return response.status(401).json({ error: 'token missing or invalid' })
-    }
-    throw error
+  // verify the token first
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' })
   }
+
+  // find the user
+  const user = await User.findById(decodedToken.id)
+  if (!user) {
+    return response.status(400).json()
+  }
+
+  // create the blog using user._id
+  const blog = new Blog({ ...request.body, user: user._id })
+  // console.log(blog)
+
+  if (!blog.title || !blog.url) {
+    return response.status(400).json()
+  }
+
+  // odotetaan blogin tallennusta
+  const savedBlog = await blog.save()
+
+  // liitetään uusi blogi sen luoneeseen käyttäjään
+  user.blogs = user.blogs.concat(savedBlog)
+  await user.save()
+
+  // lähetetään myöntävä vastaus takaisin + blogi
+  response.status(201).json(savedBlog)
 })
 
 // delete a single blog by their id
@@ -82,5 +80,27 @@ app.put('/api/blogs/:id', async (request, response) => {
   )
   response.status(200).json(updatedBlog)
 })
+
+// error handle middleware
+const errorHandler = (error, request, response, next) => {
+  logger.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  } else if (error.name === 'JsonWebTokenError') {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  } else if (error.name === 'TokenExpiredError') {
+    return response.status(401).json({
+      error: 'token expired',
+    })
+  }
+
+  next(error)
+}
+
+// tämä tulee kaikkien muiden middlewarejen ja routejen rekisteröinnin jälkeen!
+app.use(errorHandler)
 
 export default app
