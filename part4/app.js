@@ -6,10 +6,12 @@ import User from './models/user.js'
 import usersRouter from './controllers/users.js'
 import loginRouter from './controllers/login.js'
 import jwt from 'jsonwebtoken'
+import middleware from './utils/middleware.js'
 
 const app = express()
 //middleware
 app.use(express.json())
+app.use(middleware)
 app.use('/api/users/', usersRouter)
 app.use('/api/login', loginRouter)
 
@@ -19,23 +21,13 @@ app.get('/api/blogs', async (request, response) => {
   response.json(blogs)
 })
 
-// let's extract token from authorization header
-const getTokenFrom = (request) => {
-  const authorization = request.get('authorization')
-  // jos token alkaa Bearerilla niin korvataan Bearer tyhjällä ja saadaan bearer token...
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
-  }
-  return null
-}
-
 // add new blog
 app.post('/api/blogs', async (request, response) => {
   // copy the fields from the submitted blog into this new object
   //ensin tehdään tämä
 
   // verify the token first
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' })
   }
