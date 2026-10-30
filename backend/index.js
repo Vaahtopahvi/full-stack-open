@@ -185,7 +185,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     .catch((error) => next(error))
 })
 
-//middleware
+// error handle middleware
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
