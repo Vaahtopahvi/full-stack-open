@@ -59,6 +59,16 @@ app.post('/api/blogs', async (request, response) => {
 
 // delete a single blog by their id
 app.delete('/api/blogs/:id', async (request, response) => {
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token is invalid' })
+  }
+  const fetchedBlog = await Blog.findById(request.params.id)
+  if (!fetchedBlog) {
+    return response.status(404).json({ error: 'no blog found' })
+  } else if (!(fetchedBlog.user.toString() === decodedToken.id.toString())) {
+    return response.status(403).json({ error: 'user ID mismatch' })
+  }
   await Blog.findByIdAndDelete(request.params.id)
   response.status(204).end()
 })
