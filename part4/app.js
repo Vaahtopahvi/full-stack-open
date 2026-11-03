@@ -2,16 +2,18 @@ import express from 'express'
 // import mongoose from 'mongoose'
 import logger from './utils/logger.js'
 import Blog from './models/blog.js'
-import User from './models/user.js'
+// import User from './models/user.js'
 import usersRouter from './controllers/users.js'
 import loginRouter from './controllers/login.js'
-import jwt from 'jsonwebtoken'
+// import jwt from 'jsonwebtoken'
 import middleware from './utils/middleware.js'
 
 const app = express()
 //middleware
 app.use(express.json())
-app.use(middleware)
+// let's use token and user extractor only in 'api/blogs' post and delete
+// Extract the Bearer token once so later middleware and routes can read request.token.
+app.use(middleware.tokenExtractor)
 app.use('/api/users/', usersRouter)
 app.use('/api/login', loginRouter)
 
@@ -22,23 +24,12 @@ app.get('/api/blogs', async (request, response) => {
 })
 
 // add new blog
-app.post('/api/blogs', async (request, response) => {
-  // copy the fields from the submitted blog into this new object
-  //ensin tehdään tämä
+// userExtractor runs before this handler and provides the authenticated user as request.user.
+app.post('/api/blogs', middleware.userExtractor, async (request, response) => {
+  // userExtractor has already verified the credential and attached the matching user.
+  const user = request.user
 
-  // verify the token first
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-
-  // find the user
-  const user = await User.findById(decodedToken.id)
-  if (!user) {
-    return response.status(400).json()
-  }
-
-  // create the blog using user._id
+  // Use the authenticated user's ID, not an owner ID supplied by the request body.
   const blog = new Blog({ ...request.body, user: user._id })
   // console.log(blog)
 
@@ -49,7 +40,7 @@ app.post('/api/blogs', async (request, response) => {
   // odotetaan blogin tallennusta
   const savedBlog = await blog.save()
 
-  // liitetään uusi blogi sen luoneeseen käyttäjään
+  // Keep the user's list of blogs in sync with the blog's user field.
   user.blogs = user.blogs.concat(savedBlog)
   await user.save()
 
@@ -58,20 +49,25 @@ app.post('/api/blogs', async (request, response) => {
 })
 
 // delete a single blog by their id
-app.delete('/api/blogs/:id', async (request, response) => {
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token is invalid' })
-  }
-  const fetchedBlog = await Blog.findById(request.params.id)
-  if (!fetchedBlog) {
-    return response.status(404).json({ error: 'no blog found' })
-  } else if (!(fetchedBlog.user.toString() === decodedToken.id.toString())) {
-    return response.status(403).json({ error: 'user ID mismatch' })
-  }
-  await Blog.findByIdAndDelete(request.params.id)
-  response.status(204).end()
-})
+app.delete(
+  '/api/blogs/:id',
+  // Attach the authenticated user before checking who owns the requested blog.
+  middleware.userExtractor,
+  async (request, response) => {
+    const user = request.user
+
+    const fetchedBlog = await Blog.findById(request.params.id)
+    if (!fetchedBlog) {
+      return response.status(404).json({ error: 'no blog found' })
+    }
+    // Convert the database ObjectId to a string before comparing it with the user's ID.
+    if (fetchedBlog.user.toString() !== user.id.toString()) {
+      return response.status(403).json({ error: 'user ID mismatch' })
+    }
+    await Blog.findByIdAndDelete(request.params.id)
+    response.status(204).end()
+  },
+)
 
 // update a single blog by their id
 app.put('/api/blogs/:id', async (request, response) => {
@@ -87,6 +83,7 @@ app.put('/api/blogs/:id', async (request, response) => {
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message)
 
+  // Convert known database and token errors into appropriate HTTP responses.
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
@@ -102,7 +99,7 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
-// tämä tulee kaikkien muiden middlewarejen ja routejen rekisteröinnin jälkeen!
+// register error handling last so it can process errors from the routes above.
 app.use(errorHandler)
 
 export default app
