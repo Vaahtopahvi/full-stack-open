@@ -4,11 +4,29 @@ import mongoose from 'mongoose'
 import supertest from 'supertest'
 import app from '../app.js'
 import Blog from '../models/blog.js'
+import User from '../models/user.js'
 import helper from '../utils/list_helper.js'
+import bcrypt from 'bcrypt'
 
 const api = supertest(app)
+let token
 
 beforeEach(async () => {
+  await User.deleteMany({})
+  const saltRounds = 10
+  // hashataan salasana ja tallennetaan se muuttujaan
+  const passwordHash = await bcrypt.hash('password', saltRounds)
+  // luodaan testikäyttäjä testi credentiaaleilla
+  await new User({ username: 'user1', passwordHash }).save()
+  // const user = await User.findOne({ username })
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: 'user1', password: 'password' })
+    .expect(200)
+
+  token = loginResponse.body.token
+
   await Blog.deleteMany({})
   // console.log('cleared!')
 
@@ -59,6 +77,7 @@ test('a valid blog can be added ', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -73,6 +92,20 @@ test('a valid blog can be added ', async () => {
   assert(contents.includes('Type shi'))
 })
 
+test('a valid blog can not be added without a token', async () => {
+  const newBlog = {
+    title: 'OSRS is a good game',
+    author: 'Jagex',
+    url: 'https://oldschool.runescape.com',
+    likes: 1,
+  }
+  await api.post('/api/blogs').send(newBlog).expect(401)
+
+  const response = await api.get('/api/blogs')
+
+  assert.strictEqual(response.body.length, helper.initialBlogs.length)
+})
+
 test('change like count to zero, if no likes are provided', async () => {
   const newBlog = {
     title: 'Jinpings Dynastia',
@@ -81,6 +114,7 @@ test('change like count to zero, if no likes are provided', async () => {
   }
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -99,6 +133,7 @@ test('send error 400 if blog has no title', async () => {
   }
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
     .expect('Content-Type', /application\/json/)
@@ -111,6 +146,7 @@ test('send error 400 if blog has no url', async () => {
   }
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
     .expect('Content-Type', /application\/json/)
@@ -118,14 +154,24 @@ test('send error 400 if blog has no url', async () => {
 
 describe('deletion of a blog', () => {
   test('succeeds with status code 204 if id is valid', async () => {
-    // blogit alussa
-    const blogsAtStart = await helper.blogsInDb()
-    // NOTE: Promise.all suorittaa kaikkia syötteenä saamiaan promiseja rinnakkain
-    // console.log(blogsAtStart)
-    const blogToDelete = blogsAtStart[0]
-    // console.log('blog to delete', blogToDelete)
+    const newBlog = {
+      title: 'Blog to delete',
+      author: 'Test user',
+      url: 'https://example.com',
+    }
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+    const createResponse = await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newBlog)
+      .expect(201)
+
+    const blogToDelete = createResponse.body
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204)
 
     // blogit poiston jälkeen
     const blogsAtEnd = await helper.blogsInDb()
@@ -134,7 +180,7 @@ describe('deletion of a blog', () => {
     const ids = blogsAtEnd.map((n) => n.id)
     assert(!ids.includes(blogToDelete.id))
 
-    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1)
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
   })
 })
 
@@ -148,6 +194,7 @@ test('succeeds with status code 200 if update is success', async () => {
 
   await api
     .put(`/api/blogs/${blogToEdit.id}`)
+    .set('Authorization', `Bearer ${token}`)
     .send({ likes: expectedLikes })
     .expect(200)
 
