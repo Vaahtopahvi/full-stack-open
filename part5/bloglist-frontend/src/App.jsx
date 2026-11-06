@@ -13,17 +13,33 @@ const App = () => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON);
+      setUser(user);
+      blogService.setToken(user.token);
+    }
+  }, []);
+
   const handleLogin = async (event) => {
     event.preventDefault();
 
     try {
       const user = await loginService.login({ username, password });
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user));
       setUser(user);
       setUsername('');
       setPassword('');
+      blogService.setToken(user.token); //tekoäly sano et tääki ois hyvä olla: 'if later blog actions need authorization. On logout, clear that in-memory token too if your service supports it.'
     } catch {
-      console.log('logging in with', username, password);
+      console.log('logging in with', username, 'password');
     }
+  };
+
+  const handleLogout = async () => {
+    localStorage.removeItem('loggedBlogappUser');
+    setUser(null);
   };
 
   if (user === null) {
@@ -58,6 +74,12 @@ const App = () => {
   return (
     <div>
       <p>{user.name} logged in</p>
+      <div>
+        <button type="button" onClick={handleLogout}>
+          {' '}
+          logout
+        </button>
+      </div>
       <h2>blogs</h2>
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
