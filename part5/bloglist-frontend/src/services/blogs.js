@@ -12,4 +12,14 @@ const getAll = () => {
   return request.then((response) => response.data);
 };
 
-export default { setToken, getAll };
+const createBlog = async (blog) => {
+  // Axios takes three parameters as its arguments: url, data, config
+  // url = where it posts, data = the blog, config = the token
+  const response = await axios.post(baseUrl, blog, {
+    headers: { Authorization: token },
+  });
+  console.log('hello', response.data);
+  return response.data;
+};
+
+export default { setToken, getAll, createBlog };
