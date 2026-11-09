@@ -11,10 +11,20 @@ const App = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [url, setUrl] = useState('');
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
+
+  const Notification = ({ message }) => {
+    console.log(message);
+    if (message === null) {
+      return null;
+    } else if (message.type === 'error') {
+      return <div className="error">{message.message}</div>;
+    } else return <div className="success">{message.message}</div>;
+  };
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
@@ -36,7 +46,15 @@ const App = () => {
       setPassword('');
       blogService.setToken(user.token); //tekoäly sano et tääki ois hyvä olla: 'if later blog actions need authorization. On logout, clear that in-memory token too if your service supports it.'
     } catch {
-      console.log('logging in with', username, 'failed');
+      // console.log('logging in with', username, 'failed');
+      // virheviesti epäonnistuneelle kirjautumiselle
+      setToast({
+        message: `wrong username or password`,
+        type: 'error',
+      });
+      setTimeout(() => {
+        setToast(null);
+      }, 5000);
     }
   };
 
@@ -54,6 +72,14 @@ const App = () => {
       setTitle('');
       setAuthor('');
       setUrl('');
+      // onnistumisviesti ja ajastin setToastille
+      setToast({
+        message: `a new blog ${blog.title} by ${blog.author} added`,
+        type: 'success',
+      });
+      setTimeout(() => {
+        setToast(null);
+      }, 5000);
     } catch {
       console.log('failed adding a blog');
     }
@@ -63,6 +89,7 @@ const App = () => {
     return (
       <div>
         <h2>Log in to application</h2>
+        <Notification message={toast} />
         <form onSubmit={handleLogin}>
           <label>
             username
@@ -96,6 +123,8 @@ const App = () => {
           {' '}
           logout
         </button>
+        {/* toastin paikka */}
+        <Notification message={toast} />
       </div>
       <form onSubmit={handleSubmit}>
         <h2>create new blog</h2>
