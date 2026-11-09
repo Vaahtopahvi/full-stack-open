@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login.js';
+import BlogForm from './components/BlogForm.jsx';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -12,13 +13,14 @@ const App = () => {
   const [author, setAuthor] = useState('');
   const [url, setUrl] = useState('');
   const [toast, setToast] = useState(null);
+  const [showBlogForm, setShowBlogForm] = useState(false);
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
 
   const Notification = ({ message }) => {
-    console.log(message);
+    // console.log(message);
     if (message === null) {
       return null;
     } else if (message.type === 'error') {
@@ -63,6 +65,8 @@ const App = () => {
     setUser(null);
   };
 
+  const handleCancel = () => setShowBlogForm(false);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -77,12 +81,41 @@ const App = () => {
         message: `a new blog ${blog.title} by ${blog.author} added`,
         type: 'success',
       });
+      setShowBlogForm(false);
       setTimeout(() => {
         setToast(null);
       }, 5000);
     } catch {
       console.log('failed adding a blog');
     }
+  };
+
+  const renderBlogForm = () => {
+    const hideForm = { display: showBlogForm ? 'none' : '' };
+    const showForm = { display: showBlogForm ? '' : 'none' };
+
+    return (
+      <div>
+        <div style={hideForm}>
+          <button type="button" onClick={() => setShowBlogForm(true)}>
+            create new blog
+          </button>
+          {/* console.log('nyt on', {hideForm}) */}
+        </div>
+        <div style={showForm}>
+          <BlogForm
+            title={title}
+            author={author}
+            url={url}
+            handleTitleChange={({ target }) => setTitle(target.value)}
+            handleAuthorChange={({ target }) => setAuthor(target.value)}
+            handleUrlChange={({ target }) => setUrl(target.value)}
+            handleSubmit={handleSubmit}
+            handleCancel={handleCancel}
+          />
+        </div>
+      </div>
+    );
   };
 
   if (user === null) {
@@ -125,39 +158,8 @@ const App = () => {
         </button>
         {/* toastin paikka */}
         <Notification message={toast} />
+        <div>{renderBlogForm()}</div>
       </div>
-      <form onSubmit={handleSubmit}>
-        <h2>create new blog</h2>
-        <label>
-          title:
-          <input
-            type="text"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-          />
-        </label>
-        <div>
-          <label>
-            author:
-            <input
-              type="text"
-              value={author}
-              onChange={(event) => setAuthor(event.target.value)}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            url:
-            <input
-              type="text"
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-            />
-          </label>
-        </div>
-        <button type="submit">create</button>
-      </form>
       <h2>blogs</h2>
       {blogs.map((blog) => (
         <Blog key={blog.id} blog={blog} />
