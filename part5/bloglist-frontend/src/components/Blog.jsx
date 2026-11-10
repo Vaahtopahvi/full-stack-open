@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, onLike }) => {
   // changed from expression bodied component to a function body
   const [showDetails, setShowDetails] = useState(false);
   // style for detailed blog
@@ -12,6 +12,7 @@ const Blog = ({ blog }) => {
     borderWidth: 1,
     marginBottom: 5,
   };
+  console.log(typeof onLike);
 
   return (
     <div style={blogStyle}>
@@ -25,7 +26,11 @@ const Blog = ({ blog }) => {
       {showDetails && (
         <div>
           <div>{blog.url}</div>
-          <div>likes: {blog.likes}</div>
+          <div>
+            likes: {blog.likes}
+            <button onClick={() => onLike(blog)}>like</button>
+          </div>
+
           {/* jos on käyttäjän luoma, niin näytä kuka loi blogin */}
           {blog.user && <div>added: {blog.user.name}</div>}
         </div>
