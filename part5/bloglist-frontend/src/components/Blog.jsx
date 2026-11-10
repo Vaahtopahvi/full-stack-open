@@ -12,7 +12,7 @@ const Blog = ({ blog, onLike }) => {
     borderWidth: 1,
     marginBottom: 5,
   };
-  console.log(typeof onLike);
+  // console.log(typeof onLike);
 
   return (
     <div style={blogStyle}>
