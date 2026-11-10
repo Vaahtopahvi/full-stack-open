@@ -1,7 +1,37 @@
-const Blog = ({ blog }) => (
-  <div>
-    {blog.title} {blog.author}
-  </div>  
-)
+import { useState } from 'react';
 
-export default Blog
+const Blog = ({ blog }) => {
+  // changed from expression bodied component to a function body
+  const [showDetails, setShowDetails] = useState(false);
+  // style for detailed blog
+  const blogStyle = {
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: 2,
+    border: 'solid',
+    borderWidth: 1,
+    marginBottom: 5,
+  };
+
+  return (
+    <div style={blogStyle}>
+      <div>
+        {blog.title} {blog.author}
+        {/* button to show and hide details */}
+        <button onClick={() => setShowDetails(!showDetails)}>
+          {showDetails ? 'hide' : 'view'}
+        </button>
+      </div>
+      {showDetails && (
+        <div>
+          <div>{blog.url}</div>
+          <div>likes: {blog.likes}</div>
+          {/* jos on käyttäjän luoma, niin näytä kuka loi blogin */}
+          {blog.user && <div>added: {blog.user.name}</div>}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Blog;
