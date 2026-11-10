@@ -60,6 +60,17 @@ const App = () => {
     }
   };
 
+  const handleLikes = async (blog) => {
+    const updatedBlog = await blogService.increaseLikeCount(blog);
+    console.log('Appin päivitetty blogi', updatedBlog);
+    // blogien päivitys
+    setBlogs((currentBlogs) =>
+      currentBlogs.map((blog) =>
+        blog.id === updatedBlog.id ? updatedBlog : blog,
+      ),
+    );
+  };
+
   const handleLogout = async () => {
     localStorage.removeItem('loggedBlogappUser');
     setUser(null);
@@ -162,7 +173,8 @@ const App = () => {
       </div>
       <h2>blogs</h2>
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        // luodaan avainarvo, näytetään blogi ja lisätään joku toiminnallisuus
+        <Blog key={blog.id} blog={blog} onLike={handleLikes} />
       ))}
     </div>
   );
