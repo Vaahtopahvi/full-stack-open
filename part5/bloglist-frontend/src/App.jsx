@@ -61,14 +61,30 @@ const App = () => {
   };
 
   const handleLikes = async (blog) => {
-    const updatedBlog = await blogService.increaseLikeCount(blog);
-    console.log('Appin päivitetty blogi', updatedBlog);
-    // blogien päivitys
-    setBlogs((currentBlogs) =>
-      currentBlogs.map((blog) =>
-        blog.id === updatedBlog.id ? updatedBlog : blog,
-      ),
-    );
+    try {
+      const updatedBlog = await blogService.increaseLikeCount(blog);
+      console.log('Appin päivitetty blogi', updatedBlog);
+      // blogilistan päivitys currentBlogeilla
+      setBlogs((currentBlogs) =>
+        // käydään currentBlogs läpi
+        currentBlogs.map((currentBlog) =>
+          // jos currentBlogin id vastaa päivitetyn blogin id
+          currentBlog.id === updatedBlog.id
+            ? // populatetaan ainoastaan päivitetyn blogin user property alkuperäisellä blog.userilla
+              { ...updatedBlog, user: blog.user }
+            : // muuten ei tehdä mitään
+              currentBlog,
+        ),
+      );
+    } catch {
+      setToast({
+        message: 'failed adding a like',
+        type: 'error',
+      });
+      setTimeout(() => {
+        setToast(null);
+      }, 5000);
+    }
   };
 
   const handleLogout = async () => {
