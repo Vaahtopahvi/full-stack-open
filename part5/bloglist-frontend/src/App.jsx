@@ -132,6 +132,39 @@ const App = () => {
     setBlogs(sortedBlogs);
   };
 
+  // blogin poisto
+  const deleteBlog = (blogPost) => {
+    console.log('nyt aktivoitiin deleteBlog');
+    console.log(
+      'the blog which id is ' +
+        blogPost.id +
+        ' and name is ' +
+        blogPost.title +
+        ' is about to get removed',
+    );
+    //kysytään käyttäjältä haluuko se poistaa blogin listalta
+    if (window.confirm(`Are you sure you want to delete ${blogPost.title}?`)) {
+      try {
+        //jos joo, niin lähetä kutsu blogServiceen ja kutsu deleteBlogia, välitä blogia vastaava ID
+        blogService.deleteBlog(blogPost).then(() => {
+          //sitku tulee vastaus (then) niin filteröi blogi pois listasta sillä id:llä
+          setBlogs(blogs.filter((blog) => blog.id !== blogPost.id));
+        });
+        // onnistumisviesti ja ajastin setToastille
+        setToast({ message: `Deleted ${blogPost.title}`, type: 'success' });
+
+        setTimeout(() => {
+          setToast(null);
+        }, 5000);
+        console.log('Removed...');
+      } catch {
+        console.log('hi');
+      }
+    }
+    // const remove = persons.find((n) => n.id === id);
+    // console.log(remove);
+  };
+
   // näytä blogi lomake
   const renderBlogForm = () => {
     const hideForm = { display: showBlogForm ? 'none' : '' };
@@ -209,7 +242,12 @@ const App = () => {
       </div>
       {blogs.map((blog) => (
         // luodaan avainarvo, näytetään blogi ja lisätään joku toiminnallisuus
-        <Blog key={blog.id} blog={blog} onLike={handleLikes} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          onLike={handleLikes}
+          onDelete={deleteBlog}
+        />
       ))}
     </div>
   );
