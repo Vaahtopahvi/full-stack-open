@@ -14,6 +14,7 @@ const App = () => {
   const [url, setUrl] = useState('');
   const [toast, setToast] = useState(null);
   const [showBlogForm, setShowBlogForm] = useState(false);
+  // const [likedPosts, setLikedPosts] = useState()
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -117,6 +118,12 @@ const App = () => {
     }
   };
 
+  const handleSortByLikes = () => {
+    // luodaan kopio blogeista spreadilla
+    const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes);
+    setBlogs(sortedBlogs);
+  };
+
   const renderBlogForm = () => {
     const hideForm = { display: showBlogForm ? 'none' : '' };
     const showForm = { display: showBlogForm ? '' : 'none' };
@@ -188,6 +195,9 @@ const App = () => {
         <div>{renderBlogForm()}</div>
       </div>
       <h2>blogs</h2>
+      <div>
+        <button onClick={handleSortByLikes}>sort by likes</button>
+      </div>
       {blogs.map((blog) => (
         // luodaan avainarvo, näytetään blogi ja lisätään joku toiminnallisuus
         <Blog key={blog.id} blog={blog} onLike={handleLikes} />
