@@ -48,4 +48,15 @@ const createBlog = async (blog) => {
   return response.data;
 };
 
-export default { setToken, getAll, createBlog, increaseLikeCount };
+// blogin poisto
+const deleteBlog = async (blog) => {
+  console.log(blog);
+  const newUrl = baseUrl + '/' + blog.id;
+  const response = await axios.delete(newUrl, {
+    headers: { Authorization: token },
+  });
+  console.log(response.data);
+  return response.data;
+};
+
+export default { setToken, getAll, createBlog, increaseLikeCount, deleteBlog };
