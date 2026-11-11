@@ -14,12 +14,13 @@ const App = () => {
   const [url, setUrl] = useState('');
   const [toast, setToast] = useState(null);
   const [showBlogForm, setShowBlogForm] = useState(false);
-  // const [likedPosts, setLikedPosts] = useState()
 
+  // renderöi blogit kerran sivun latauksen yhteydessä
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
 
+  // ilmoitus virheellisistä ja onnistuneista tapahtumista
   const Notification = ({ message }) => {
     // console.log(message);
     if (message === null) {
@@ -29,6 +30,7 @@ const App = () => {
     } else return <div className="success">{message.message}</div>;
   };
 
+  // ota local storagesta käyttäjän tokeni muistiin ja aseta käyttäjälle?
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
     if (loggedUserJSON) {
@@ -38,6 +40,7 @@ const App = () => {
     }
   }, []);
 
+  // kirjaa käyttäjä sisään
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -61,6 +64,7 @@ const App = () => {
     }
   };
 
+  // lisää uusi tykkäys
   const handleLikes = async (blog) => {
     try {
       const updatedBlog = await blogService.increaseLikeCount(blog);
@@ -88,13 +92,16 @@ const App = () => {
     }
   };
 
+  // kirjaa käyttäjä ulos
   const handleLogout = async () => {
     localStorage.removeItem('loggedBlogappUser');
     setUser(null);
   };
 
+  // sulje blogi lomake
   const handleCancel = () => setShowBlogForm(false);
 
+  // julkaise uusi blogi
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -118,12 +125,14 @@ const App = () => {
     }
   };
 
+  // näytä tykätyimmät blogit
   const handleSortByLikes = () => {
     // luodaan kopio blogeista spreadilla
     const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes);
     setBlogs(sortedBlogs);
   };
 
+  // näytä blogi lomake
   const renderBlogForm = () => {
     const hideForm = { display: showBlogForm ? 'none' : '' };
     const showForm = { display: showBlogForm ? '' : 'none' };
