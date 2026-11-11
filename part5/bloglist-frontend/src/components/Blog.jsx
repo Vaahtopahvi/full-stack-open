@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Blog = ({ blog, onLike }) => {
+const Blog = ({ blog, onLike, onDelete }) => {
   // changed from expression bodied component to a function body
   const [showDetails, setShowDetails] = useState(false);
   // style for detailed blog
@@ -30,9 +30,13 @@ const Blog = ({ blog, onLike }) => {
             likes: {blog.likes}
             <button onClick={() => onLike(blog)}>like</button>
           </div>
-
-          {/* jos on käyttäjän luoma, niin näytä kuka loi blogin */}
-          {blog.user && <div>added: {blog.user.name}</div>}
+          <div>
+            {/* jos on käyttäjän luoma, niin näytä kuka loi blogin */}
+            {blog.user && <div>added: {blog.user.name}</div>}
+          </div>
+          <div>
+            <button onClick={() => onDelete(blog)}>remove</button>
+          </div>
         </div>
       )}
     </div>
