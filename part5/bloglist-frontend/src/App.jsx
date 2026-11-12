@@ -1,74 +1,74 @@
-import { useState, useEffect } from 'react';
-import Blog from './components/Blog';
-import blogService from './services/blogs';
-import loginService from './services/login.js';
-import BlogForm from './components/BlogForm.jsx';
+import { useState, useEffect } from 'react'
+import Blog from './components/Blog'
+import blogService from './services/blogs'
+import loginService from './services/login.js'
+import BlogForm from './components/BlogForm.jsx'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null);
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setUrl] = useState('');
-  const [toast, setToast] = useState(null);
-  const [showBlogForm, setShowBlogForm] = useState(false);
+  const [blogs, setBlogs] = useState([])
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
+  const [toast, setToast] = useState(null)
+  const [showBlogForm, setShowBlogForm] = useState(false)
 
   // renderöi blogit kerran sivun latauksen yhteydessä
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
+    blogService.getAll().then((blogs) => setBlogs(blogs))
+  }, [])
 
   // ilmoitus virheellisistä ja onnistuneista tapahtumista
   const Notification = ({ message }) => {
     // console.log(message);
     if (message === null) {
-      return null;
+      return null
     } else if (message.type === 'error') {
-      return <div className="error">{message.message}</div>;
-    } else return <div className="success">{message.message}</div>;
-  };
+      return <div className="error">{message.message}</div>
+    } else return <div className="success">{message.message}</div>
+  }
 
   // ota local storagesta käyttäjän tokeni muistiin ja aseta käyttäjälle?
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-      blogService.setToken(user.token);
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
     }
-  }, []);
+  }, [])
 
   // kirjaa käyttäjä sisään
   const handleLogin = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
     try {
-      const user = await loginService.login({ username, password });
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user));
-      setUser(user);
-      setUsername('');
-      setPassword('');
-      blogService.setToken(user.token); //tekoäly sano et tääki ois hyvä olla: 'if later blog actions need authorization. On logout, clear that in-memory token too if your service supports it.'
+      const user = await loginService.login({ username, password })
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
+      setUser(user)
+      setUsername('')
+      setPassword('')
+      blogService.setToken(user.token) //tekoäly sano et tääki ois hyvä olla: 'if later blog actions need authorization. On logout, clear that in-memory token too if your service supports it.'
     } catch {
       // console.log('logging in with', username, 'failed');
       // virheviesti epäonnistuneelle kirjautumiselle
       setToast({
-        message: `wrong username or password`,
+        message: 'wrong username or password',
         type: 'error',
-      });
+      })
       setTimeout(() => {
-        setToast(null);
-      }, 5000);
+        setToast(null)
+      }, 5000)
     }
-  };
+  }
 
   // lisää uusi tykkäys
   const handleLikes = async (blog) => {
     try {
-      const updatedBlog = await blogService.increaseLikeCount(blog);
-      console.log('Appin päivitetty blogi', updatedBlog);
+      const updatedBlog = await blogService.increaseLikeCount(blog)
+      console.log('Appin päivitetty blogi', updatedBlog)
       // blogilistan päivitys currentBlogeilla
       setBlogs((currentBlogs) =>
         // käydään currentBlogs läpi
@@ -76,99 +76,99 @@ const App = () => {
           // jos currentBlogin id vastaa päivitetyn blogin id
           currentBlog.id === updatedBlog.id
             ? // populatetaan ainoastaan päivitetyn blogin user property alkuperäisellä blog.userilla
-              { ...updatedBlog, user: blog.user }
+            { ...updatedBlog, user: blog.user }
             : // muuten ei tehdä mitään
-              currentBlog,
+            currentBlog,
         ),
-      );
+      )
     } catch {
       setToast({
         message: 'failed adding a like',
         type: 'error',
-      });
+      })
       setTimeout(() => {
-        setToast(null);
-      }, 5000);
+        setToast(null)
+      }, 5000)
     }
-  };
+  }
 
   // kirjaa käyttäjä ulos
   const handleLogout = async () => {
-    localStorage.removeItem('loggedBlogappUser');
-    setUser(null);
-  };
+    localStorage.removeItem('loggedBlogappUser')
+    setUser(null)
+  }
 
   // sulje blogi lomake
-  const handleCancel = () => setShowBlogForm(false);
+  const handleCancel = () => setShowBlogForm(false)
 
   // julkaise uusi blogi
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
     try {
-      const blog = await blogService.createBlog({ title, author, url });
-      setBlogs((currentblogs) => currentblogs.concat(blog));
-      setTitle('');
-      setAuthor('');
-      setUrl('');
+      const blog = await blogService.createBlog({ title, author, url })
+      setBlogs((currentblogs) => currentblogs.concat(blog))
+      setTitle('')
+      setAuthor('')
+      setUrl('')
       // onnistumisviesti ja ajastin setToastille
       setToast({
         message: `a new blog ${blog.title} by ${blog.author} added`,
         type: 'success',
-      });
-      setShowBlogForm(false);
+      })
+      setShowBlogForm(false)
       setTimeout(() => {
-        setToast(null);
-      }, 5000);
+        setToast(null)
+      }, 5000)
     } catch {
-      console.log('failed adding a blog');
+      console.log('failed adding a blog')
     }
-  };
+  }
 
   // näytä tykätyimmät blogit
   const handleSortByLikes = () => {
     // luodaan kopio blogeista spreadilla
-    const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes);
-    setBlogs(sortedBlogs);
-  };
+    const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes)
+    setBlogs(sortedBlogs)
+  }
 
   // blogin poisto
   const deleteBlog = (blogPost) => {
-    console.log('nyt aktivoitiin deleteBlog');
+    console.log('nyt aktivoitiin deleteBlog')
     console.log(
       'the blog which id is ' +
         blogPost.id +
         ' and name is ' +
         blogPost.title +
         ' is about to get removed',
-    );
+    )
     //kysytään käyttäjältä haluuko se poistaa blogin listalta
     if (window.confirm(`Are you sure you want to delete ${blogPost.title}?`)) {
       try {
         //jos joo, niin lähetä kutsu blogServiceen ja kutsu deleteBlogia, välitä blogia vastaava ID
         blogService.deleteBlog(blogPost).then(() => {
           //sitku tulee vastaus (then) niin filteröi blogi pois listasta sillä id:llä
-          setBlogs(blogs.filter((blog) => blog.id !== blogPost.id));
-        });
+          setBlogs(blogs.filter((blog) => blog.id !== blogPost.id))
+        })
         // onnistumisviesti ja ajastin setToastille
-        setToast({ message: `Deleted ${blogPost.title}`, type: 'success' });
+        setToast({ message: `Deleted ${blogPost.title}`, type: 'success' })
 
         setTimeout(() => {
-          setToast(null);
-        }, 5000);
-        console.log('Removed...');
+          setToast(null)
+        }, 5000)
+        console.log('Removed...')
       } catch {
-        console.log('hi');
+        console.log('hi')
       }
     }
     // const remove = persons.find((n) => n.id === id);
     // console.log(remove);
-  };
+  }
 
   // näytä blogi lomake
   const renderBlogForm = () => {
-    const hideForm = { display: showBlogForm ? 'none' : '' };
-    const showForm = { display: showBlogForm ? '' : 'none' };
+    const hideForm = { display: showBlogForm ? 'none' : '' }
+    const showForm = { display: showBlogForm ? '' : 'none' }
 
     return (
       <div>
@@ -191,8 +191,8 @@ const App = () => {
           />
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   if (user === null) {
     return (
@@ -221,7 +221,7 @@ const App = () => {
           <button type="submit">login</button>
         </form>
       </div>
-    );
+    )
   }
 
   return (
@@ -250,7 +250,7 @@ const App = () => {
         />
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default App

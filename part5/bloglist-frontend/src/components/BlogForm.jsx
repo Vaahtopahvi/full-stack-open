@@ -34,7 +34,7 @@ const BlogForm = ({
         </button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default BlogForm;
+export default BlogForm

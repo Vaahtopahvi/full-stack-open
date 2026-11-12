@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState } from 'react'
 
 const Blog = ({ blog, onLike, onDelete }) => {
   // changed from expression bodied component to a function body
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(false)
   // style for detailed blog
   const blogStyle = {
     paddingTop: 5,
@@ -11,7 +11,7 @@ const Blog = ({ blog, onLike, onDelete }) => {
     border: 'solid',
     borderWidth: 1,
     marginBottom: 5,
-  };
+  }
   // console.log(typeof onLike);
 
   return (
@@ -40,7 +40,7 @@ const Blog = ({ blog, onLike, onDelete }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Blog;
+export default Blog
