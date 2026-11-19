@@ -45,3 +45,28 @@ test('clicking a button opens expanded details', async () => {
   expect(container).toHaveTextContent('https://example.com')
   expect(container).toHaveTextContent(`added: ${blog.user.name}`)
 })
+
+test('clicking a like button two times triggers onLike handler twice', async () => {
+  const blog = {
+    title: 'RIP Trump',
+    author: 'Riku',
+    url: 'https://example.com',
+    likes: 5,
+    user: { name: 'katori' },
+  }
+
+  const mockHandler = vi.fn()
+
+  render(<Blog blog={blog} onLike={mockHandler} />)
+
+  const user = userEvent.setup()
+  screen.debug()
+  const viewButton = screen.getByText('view')
+  await user.click(viewButton)
+  const likeButton = screen.getByText('like')
+  await user.click(likeButton)
+  await user.click(likeButton)
+  // screen.debug()
+  // console.log(mockHandler.mock.calls.length)
+  expect(mockHandler.mock.calls).toHaveLength(2)
+})
