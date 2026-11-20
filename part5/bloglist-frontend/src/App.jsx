@@ -9,9 +9,6 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
   const [toast, setToast] = useState(null)
   const [showBlogForm, setShowBlogForm] = useState(false)
 
@@ -102,15 +99,12 @@ const App = () => {
   const handleCancel = () => setShowBlogForm(false)
 
   // julkaise uusi blogi
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
+  const handleSubmit = async (newBlog) => {
     try {
-      const blog = await blogService.createBlog({ title, author, url })
+      // lähetetään blog serviceen uusi blogi
+      const blog = await blogService.createBlog(newBlog)
+      // lisätään sen muiden blogien joukkoon
       setBlogs((currentblogs) => currentblogs.concat(blog))
-      setTitle('')
-      setAuthor('')
-      setUrl('')
       // onnistumisviesti ja ajastin setToastille
       setToast({
         message: `a new blog ${blog.title} by ${blog.author} added`,
@@ -120,8 +114,12 @@ const App = () => {
       setTimeout(() => {
         setToast(null)
       }, 5000)
+      // palautetaan blogi, niin BlogForm tietää, että kaikki OK
+      return blog
     } catch {
       console.log('failed adding a blog')
+      // muuten palauta null, niin lomake pitää aikaisemmat tiedot
+      return null
     }
   }
 
@@ -179,16 +177,8 @@ const App = () => {
           {/* console.log('nyt on', {hideForm}) */}
         </div>
         <div style={showForm}>
-          <BlogForm
-            title={title}
-            author={author}
-            url={url}
-            handleTitleChange={({ target }) => setTitle(target.value)}
-            handleAuthorChange={({ target }) => setAuthor(target.value)}
-            handleUrlChange={({ target }) => setUrl(target.value)}
-            handleSubmit={handleSubmit}
-            handleCancel={handleCancel}
-          />
+          {/* lähetetään blogFormille kaksi handleria */}
+          <BlogForm createBlog={handleSubmit} handleCancel={handleCancel} />
         </div>
       </div>
     )
