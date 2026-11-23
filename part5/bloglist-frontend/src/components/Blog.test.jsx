@@ -60,7 +60,7 @@ test('clicking a like button two times triggers onLike handler twice', async () 
   render(<Blog blog={blog} onLike={mockHandler} />)
 
   const user = userEvent.setup()
-  screen.debug()
+  // screen.debug()
   const viewButton = screen.getByText('view')
   await user.click(viewButton)
   const likeButton = screen.getByText('like')
