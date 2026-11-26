@@ -86,11 +86,6 @@ app.get('/info', (request, response) => {
 //   response.json(persons);
 // });
 
-// const generateId = () => {
-//   const randomId = Math.floor(Math.random() * 100000);
-//   return String(randomId);
-// };
-
 // uuden henkilön lisäys
 app.post('/api/persons', (request, response, next) => {
   const person = new Person(request.body)
